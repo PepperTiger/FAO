@@ -79,7 +79,7 @@ prod_t<-prod_t%>%filter(country_code!=351)
 #CrÃ©ation de la table population.
 
 population_t<- population_data%>%
-  rename('country'=Area,'country_code'=Area.Code,'year'=Year,)%>%
+  rename('country'=Area,'country_code'=Area.Code,'year'=Year)%>%
   mutate(population=Value*1000)%>%
   select(country,country_code,year,population)
 
@@ -164,19 +164,19 @@ foodmoyprot<-jointure_clean%>%
 # 2.4 disponibilité calorique mondiale
 
 dispo_veg_kcal<-jointure_clean %>%filter(origin=="vegetal")%>%
-                  mutate(dom_sup_kcal_country=`food_sup_qu_kcal/cpt/day` *population*365)%>%
+                  mutate(dom_sup_kcal_country=domestic_supply_qu_1000t*1000000*ratio_kcal_kg)%>%
                   group_by(year)%>%
-                  summarise(dom_sup_kcal=sum(dom_sup_kcal_country))
+                  summarise(dom_sup_kcal=sum(dom_sup_kcal_country,na.rm=TRUE))
 
   #disponibilite proteique en kg
 
 
 dispo_veg_prot<-jointure_clean%>%filter(origin=="vegetal")%>%
-                 mutate(dom_sup_kg_prot_country=`protein_sup_qu_g/cpt/day`*population*365/1000)%>%
+                 mutate(dom_sup_kg_prot_country=domestic_supply_qu_1000t*1000000*ratio_protein_prct*0.01)%>%
                  group_by(year)%>%
-                 summarise(dom_sup_kg_prot=sum(dom_sup_kg_prot_country))
+                 summarise(dom_sup_kg_prot=sum(dom_sup_kg_prot_country,na.rm=TRUE))
   
-dispo_veg_prot$dom_sup_kg_prot<-formatC(dispo_veg_prot$dom_sup_kg_prot,format="e",digits=2)
+dispo_veg_prot$dom_sup_kg_prot<-as.numeric(formatC(dispo_veg_prot$dom_sup_kg_prot,format="e",digits=5))
 
 
 ggplot(dispo_veg_kcal)+geom_point(aes(x=year,y=dom_sup_kcal))
@@ -187,19 +187,29 @@ ggplot(dispo_veg_prot)+ geom_point(aes(x=year,y=dom_sup_kg_prot))
 #si toute la disponibilité intérieure mondiale de produits végétaux était utilisée pour de la nourriture
 #2000 kcal par j/humain
 
-a<-dispo_veg_kcal%>%mutate(nb_pers_nourries=(dom_sup_kcal/365)/2000)
+a<-dispo_veg_kcal%>%mutate(nb_pers_nourries=(dom_sup_kcal/365)/2500)
                            
-a$nb_pers_nourries<-as.numeric(formatC(a$nb_pers_nourries,format="e",digits=5))
+a$nb_pers_nourries<-formatC(a$nb_pers_nourries,format="e",digits=5)
 
 a
 
 
-dispo_veg_prot%>%mutate(nb_pers_prot=as.numeric(dom_sup_kg_prot)/0.06)
+b<-dispo_veg_prot%>%mutate(nb_pers_prot=as.numeric(dom_sup_kg_prot/365)/0.06)
+b$nb_pers_prot<-formatC(b$nb_pers_prot,format="e",digits=5)
+
+b
 
 
-
-
-
-
-
-  
+# 
+# # Nombre de calories par jour et par personne
+# NB_KCAL_PER_CAPITA_PER_DAY = 2500
+# 
+# # Poids moyen d'un humain : 62kg (https://en.wikipedia.org/wiki/Human_body_weight)
+# # Besoin en protéines moyens pour un humain : 0.9 g/kg/jour
+# KG_PROT_PER_CAPITA_PER_DAY = 62 * .9 * .001
+# YEAR = 2013
+# 
+# population = dom_sup.loc[YEAR, "dom_sup_kcal"] / 365 / NB_KCAL_PER_CAPITA_PER_DAY
+# 
+# 
+#   
