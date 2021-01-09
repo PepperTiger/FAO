@@ -133,10 +133,9 @@ jointure<-jointure%>%
 
 #ratio proteinique 
 
-jointure<-jointure%>%mutate(ratio_protein=ifelse(`food_sup_qu_kg/cpt/yr`!=0,
-                                                 `protein_sup_qu_g/cpt/day`*365/(1000*`food_sup_qu_kg/cpt/yr`),
-                                                 NA)
-)
+jointure<-jointure%>%mutate(ratio_protein_prct=ifelse(`food_sup_qu_kg/cpt/yr`!=0,
+                                                 100*`protein_sup_qu_g/cpt/day`*365/(1000*`food_sup_qu_kg/cpt/yr`),
+                                                 NA))
 
 
 #les 20 aliments les plus riches en calories
@@ -144,19 +143,20 @@ jointure_clean<-jointure%>%filter(ratio_kcal_kg>20,ratio_kcal_kg<=9200)
 
 
 foodmoy<- jointure_clean%>% 
-  select(country,year,item,ratio_kcal_kg,ratio_protein)%>%
+  select(country,year,item,ratio_kcal_kg,ratio_protein_prct)%>%
   group_by(item)%>%
-  summarise(moykcal_kg=mean(ratio_kcal_kg,na.rm=TRUE),moyprot=mean(ratio_protein,na.rm=TRUE))%>%
+  summarise(moykcal_kg=mean(ratio_kcal_kg,na.rm=TRUE),moyprot=mean(ratio_protein_prct,na.rm=TRUE))%>%
   arrange(desc(moykcal_kg))%>%
   head(20)
 
 #les 20 aliments les plus riches en protéines 
 
 
+
 foodmoyprot<-jointure_clean%>%
-  select(country,year,item,ratio_kcal_kg,ratio_protein)%>%
+  select(country,year,item,ratio_kcal_kg,ratio_protein_prct)%>%
   group_by(item)%>%
-  summarise(moykcal_kg=mean(ratio_kcal_kg,na.rm=TRUE),moyprot=mean(ratio_protein,na.rm=TRUE))%>%
+  summarise(moykcal_kg=mean(ratio_kcal_kg,na.rm=TRUE),moyprot=mean(ratio_protein_prct,na.rm=TRUE))%>%
   arrange(desc(moyprot))%>%
   head(20)
 
