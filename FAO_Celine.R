@@ -149,8 +149,9 @@ foodmoy<- jointure_clean%>%
   arrange(desc(moykcal_kg))%>%
   head(20)
 
-#les 20 aliments les plus riches en protéines 
+foodmoy$moyprot<-formatC(foodmoy$moyprot,format="g", digits=5)
 
+#les 20 aliments les plus riches en protéines 
 
 
 foodmoyprot<-jointure_clean%>%
@@ -160,6 +161,45 @@ foodmoyprot<-jointure_clean%>%
   arrange(desc(moyprot))%>%
   head(20)
 
-sfdggh,jk
+# 2.4 disponibilité calorique mondiale
+
+dispo_veg_kcal<-jointure_clean %>%filter(origin=="vegetal")%>%
+                  mutate(dom_sup_kcal_country=`food_sup_qu_kcal/cpt/day` *population*365)%>%
+                  group_by(year)%>%
+                  summarise(dom_sup_kcal=sum(dom_sup_kcal_country))
+
+  #disponibilite proteique en kg
 
 
+dispo_veg_prot<-jointure_clean%>%filter(origin=="vegetal")%>%
+                 mutate(dom_sup_kg_prot_country=`protein_sup_qu_g/cpt/day`*population*365/1000)%>%
+                 group_by(year)%>%
+                 summarise(dom_sup_kg_prot=sum(dom_sup_kg_prot_country))
+  
+dispo_veg_prot$dom_sup_kg_prot<-formatC(dispo_veg_prot$dom_sup_kg_prot,format="e",digits=2)
+
+
+ggplot(dispo_veg_kcal)+geom_point(aes(x=year,y=dom_sup_kcal))
+
+ggplot(dispo_veg_prot)+ geom_point(aes(x=year,y=dom_sup_kg_prot))
+
+#Combien d'humains pourraient être nourris 
+#si toute la disponibilité intérieure mondiale de produits végétaux était utilisée pour de la nourriture
+#2000 kcal par j/humain
+
+a<-dispo_veg_kcal%>%mutate(nb_pers_nourries=(dom_sup_kcal/365)/2000)
+                           
+a$nb_pers_nourries<-as.numeric(formatC(a$nb_pers_nourries,format="e",digits=5))
+
+a
+
+
+dispo_veg_prot%>%mutate(nb_pers_prot=as.numeric(dom_sup_kg_prot)/0.06)
+
+
+
+
+
+
+
+  
