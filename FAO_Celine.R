@@ -160,6 +160,6 @@ foodmoyprot<-jointure_clean%>%
   arrange(desc(moyprot))%>%
   head(20)
 
-
+sfdggh,jk
 
 
