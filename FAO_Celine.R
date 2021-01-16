@@ -187,6 +187,8 @@ ggplot(dispo_veg_prot)+ geom_point(aes(x=year,y=dom_sup_kg_prot))
 #si toute la disponibilité intérieure mondiale de produits végétaux était utilisée pour de la nourriture
 #2000 kcal par j/humain
 
+
+
 a<-dispo_veg_kcal%>%mutate(nb_pers_nourries=(dom_sup_kcal/365)/2500)
                            
 a$nb_pers_nourries<-formatC(a$nb_pers_nourries,format="e",digits=5)
@@ -194,22 +196,91 @@ a$nb_pers_nourries<-formatC(a$nb_pers_nourries,format="e",digits=5)
 a
 
 
-b<-dispo_veg_prot%>%mutate(nb_pers_prot=as.numeric(dom_sup_kg_prot/365)/0.06)
+b<-dispo_veg_prot%>%mutate(nb_pers_prot=as.numeric(dom_sup_kg_prot/365)/0.056)
 b$nb_pers_prot<-formatC(b$nb_pers_prot,format="e",digits=5)
 
 b
 
 
-# 
-# # Nombre de calories par jour et par personne
-# NB_KCAL_PER_CAPITA_PER_DAY = 2500
-# 
-# # Poids moyen d'un humain : 62kg (https://en.wikipedia.org/wiki/Human_body_weight)
-# # Besoin en protéines moyens pour un humain : 0.9 g/kg/jour
-# KG_PROT_PER_CAPITA_PER_DAY = 62 * .9 * .001
-# YEAR = 2013
-# 
-# population = dom_sup.loc[YEAR, "dom_sup_kcal"] / 365 / NB_KCAL_PER_CAPITA_PER_DAY
-# 
-# 
-#   
+# Combien d'humains pourraient être nourris si toute la disponibilité alimentaire en produits végétaux (Food),
+#la nourriture végétale destinée aux animaux (Feed) et les pertes de produits végétaux (Waste) étaient utilisés pour de la nourriture ?
+dispo2_veg_kcal<-jointure_clean %>%
+  filter(origin=="vegetal")%>%
+  mutate(dom_sup_kcal_country=(food_1000t+feed_1000t+losses_1000t)*1000000*ratio_kcal_kg)%>%
+  group_by(year)%>%
+  summarise(dom_sup_kcal=sum(dom_sup_kcal_country,na.rm=TRUE))
+
+
+dispo2_veg_prot<-jointure_clean%>%filter(origin=="vegetal")%>%
+  mutate(dom_sup_kg_prot_country=(food_1000t+feed_1000t+losses_1000t)*1000000*ratio_protein_prct*0.01)%>%
+  group_by(year)%>%
+  summarise(dom_sup_kg_prot=sum(dom_sup_kg_prot_country,na.rm=TRUE))
+
+a2<-dispo2_veg_kcal%>%mutate(nb_pers_nourries=(dom_sup_kcal/365)/2500)
+
+a2$nb_pers_nourries<-formatC(a2$nb_pers_nourries,format="e",digits=5)
+
+a2
+
+
+b2<-dispo2_veg_prot%>%mutate(nb_pers_prot=as.numeric(dom_sup_kg_prot/365)/0.056)
+b2$nb_pers_prot<-formatC(b2$nb_pers_prot,format="e",digits=5)
+
+b2
+
+#création de la table sous-nutrition
+unique(unourished_people$Unit)    #toutes les données sont en millions
+
+
+unourished_people%>%select(Unit,Value)%>%
+                mutate(new_value=as.numeric(str_replace_all(Value,"<",""))*1000000)
+
+
+sous_nutrition<- unourished_people%>%
+       rename("country_code"=Area.Code,
+       "country"=Area,
+       "year"=Year)%>%
+        mutate(nb_personnes=as.numeric(str_replace_all(Value,"<",""))*1000000) %>%
+        select(country_code,country,year,nb_personnes) %>%
+        arrange(desc(nb_personnes))  #Beaucoup de NA (Somalie...)
+      
+
+sous_nutrition%>%
+filter(year=="2013-2015")%>%
+summarise(moy=mean(nb_personnes,na.rm=TRUE))
+#n=sum(nb_personnes,na.rm=TRUE,
+
+
+sous_nutrition%>%
+  filter(year=="2013-2015")%>%
+  summarise(n=sum(nb_personnes,na.rm=TRUE))
+moy<-5053846
+
+
+sous_nutrition2<-sous_nutrition%>%
+  mutate(n=ifelse(is.na(nb_personnes),moy,nb_personnes))
+
+#########################################################
+export<-prod_t%>%
+        group_by(country,item)%>%
+        summarise(export_qu_millierst=sum(export_qu_1000t,na.rm=TRUE))%>%
+        arrange(country,desc(export_qu_millierst))%>%
+        top_n(15)
+
+
+
+
+
+
+#########################################################
+export2<-prod_t%>%
+  group_by(item)%>%
+  summarise(export_qu_millierst=sum(export_qu_1000t,na.rm=TRUE))%>%
+  arrange(desc(export_qu_millierst))%>%
+  top_n(15)
+
+list_export<-export2$item
+
+grandes_importation<-
+
+
