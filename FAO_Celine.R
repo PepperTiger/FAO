@@ -244,43 +244,48 @@ sous_nutrition<- unourished_people%>%
         select(country_code,country,year,nb_personnes) %>%
         arrange(desc(nb_personnes))  #Beaucoup de NA (Somalie...)
       
-
-sous_nutrition%>%
-filter(year=="2013-2015")%>%
-summarise(moy=mean(nb_personnes,na.rm=TRUE))
-#n=sum(nb_personnes,na.rm=TRUE,
-
-
-sous_nutrition%>%
-  filter(year=="2013-2015")%>%
+sous_nutrition_2014<-sous_nutrition%>%
+  filter(year=="2013-2015")
+  
+sous_nutrition_2014%>%
   summarise(n=sum(nb_personnes,na.rm=TRUE))
-moy<-5053846
 
 
-sous_nutrition2<-sous_nutrition%>%
-  mutate(n=ifelse(is.na(nb_personnes),moy,nb_personnes))
+prod_t_2014<-prod_t%>%filter(year==2014)
 
-#########################################################
-export<-prod_t%>%
-        group_by(country,item)%>%
-        summarise(export_qu_millierst=sum(export_qu_1000t,na.rm=TRUE))%>%
-        arrange(country,desc(export_qu_millierst))%>%
-        top_n(15)
+  
+jointure_nutrition_2014<-inner_join(prod_t_2014,sous_nutrition_2014,by=c("country_code"))
 
 
-
-
-
+jointure_nutrition_2014<-jointure_nutrition%>%
+                         rename('country'=country.x,'year'=year.x)%>%
+                         select(-country.y,-year.y)
 
 #########################################################
-export2<-prod_t%>%
+# export<-prod_t%>%
+#         group_by(country,item)%>%
+#         summarise(export_qu_millierst=sum(export_qu_1000t,na.rm=TRUE))%>%
+#         arrange(country,desc(export_qu_millierst))%>%
+#         top_n(15)
+#########################################################
+
+export2<-jointure_nutrition_2014%>%
   group_by(item)%>%
   summarise(export_qu_millierst=sum(export_qu_1000t,na.rm=TRUE))%>%
   arrange(desc(export_qu_millierst))%>%
-  top_n(15)
+  top_n(20)
 
 list_export<-export2$item
 
-grandes_importation<-
+#3.4
 
-
+grandes_importation<-prod_t%>%
+                     filter(item %in% list_export,year==2014)%>%
+                     select(country_code,country,item_code,item,year,origin,import_qu_1000t)%>%
+                     arrange(desc(import_qu_1000t))%>%
+                     head(200)
+  
+  
+  
+  
+  
