@@ -71,6 +71,7 @@ prod_t<-prod_t%>%rename("country_code"=Area.Code,
                         "food_sup_qu_kcal/cpt/day" = `Food supply (kcal/capita/day)`,
                         "protein_sup_qu_g/cpt/day"=`Protein supply quantity (g/capita/day)`,
                         "fat_sup_qu_g/cpt/day"=`Fat supply quantity (g/capita/day)`)
+#???other_uses est en milliers de tonnes aussi
 
 prod_t<-prod_t%>%filter(country_code!=351)
 
@@ -279,13 +280,27 @@ list_export<-export2$item
 
 #3.4
 
-grandes_importation<-prod_t%>%
+grandes_importation_2014<-prod_t%>%
                      filter(item %in% list_export,year==2014)%>%
-                     select(country_code,country,item_code,item,year,origin,import_qu_1000t)%>%
+                     # select(country_code,country,item_code,item,year,origin,import_qu_1000t)%>%
                      arrange(desc(import_qu_1000t))%>%
                      head(200)
   
+#3.5
+import_produit<-grandes_importation_2014%>%
+                select(-year,-country_code,-c(20:23),-item_code)  %>%
+                group_by(item)%>%
+                summarise_if(is.numeric,funs(sum))
+                
+import_produit<-import_produit%>%
+                mutate(ratio_other_uses_prct=ifelse(domestic_supply_qu_1000t!=0,
+                                                 100*other_uses/domestic_supply_qu_1000t,
+                                                 NA),
+                       ratio_anim=100*feed_1000t/(food_1000t+feed_1000t))
+                  
   
+#3.6
+#Donnez les 3 produits qui ont la plus grande valeur pour chacun des 2 ratios (vous aurezdonc 6 produits à citer)
   
-  
-  
+produit_animaux_top3<-import_produit%>%arrange(desc(ratio_anim))%>%head(3)
+produit_other_uses_top3<-import_produit%>%arrange(desc(ratio_other_uses_prct))%>%head(3)
