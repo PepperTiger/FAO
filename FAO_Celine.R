@@ -304,3 +304,17 @@ import_produit<-import_produit%>%
   
 produit_animaux_top3<-import_produit%>%arrange(desc(ratio_anim))%>%head(3)
 produit_other_uses_top3<-import_produit%>%arrange(desc(ratio_other_uses_prct))%>%head(3)
+
+#3.7Combien de tonnes de céréales pourraient être libérées si les USA diminuaient
+#leur production de produits animaux de 10% ?
+
+cereals_saved<-prod_t%>%filter(country_code==231,is_cereal==TRUE,year==2014)%>%summarise(n=sum(feed_1000t,na.rm=TRUE)*0.9)
+
+#3.8 En Thaïlande, quelle proportion de manioc est exportée ? Quelle est la proportion de personnes en sous-nutrition ?
+
+t<-prod_t%>%
+filter(country_code==216,grepl("cassava",item,ignore.case=TRUE))%>%select(country,year,export_qu_1000t)
+
+
+
+
