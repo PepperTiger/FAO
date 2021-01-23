@@ -10,9 +10,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ###  Importation et préparation des données
 
 ```{r cars}
-#read the folder of csv files
+#chargement des livrairies
 library("stringr")
 library("tidyverse")
+
+#read the folder of csv files
+
 fichiers<-list.files(path = "C:/Users/celine/environnement_R_studio/FAO/fichiers_csv", pattern = NULL, all.files = FALSE,
                      full.names = FALSE, recursive = FALSE,
                      ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
@@ -110,7 +113,8 @@ colnames(population_table)
 ### 1.1 taille de la population mondiale depuis 2014
 ```{r}
 
-population_table%>%group_by(year)%>%summarise(total=sum(population,na.rm=TRUE))
+pop_totale<-population_table%>%group_by(year)%>%summarise(total=sum(population,na.rm=TRUE))
+pop_totale
 ```
 
 
@@ -241,7 +245,7 @@ b$nb_pers_nourries_prot<-formatC(b$nb_pers_nourries_prot,format="e",digits=5)
 b
 ```
 
-#### 2.4.3 Combien d'humains pourraient être nourris si toute la disponibilité alimentaire en produits végétaux (Food), la nourriture végétale destinée aux animaux (Feed) et les pertes de produits végétaux (Waste) étaient utilisés pour de la nourriture ? Donnez les résultats en termes de calories, puis de protéines, et exprimez ensuite ces 2 résultats en pourcentage de la population mondiale.
+#### 2.4.3 Combien d'humains pourraient être nourris si toute la disponibilité alimentaire en produits vegetaux (Food), la nourriture végétale destinée aux animaux (Feed) et les pertes de produits végétaux (Waste) étaient utilisés pour de la nourriture ? Donnez les résultats en termes de calories, puis de protéines, et exprimez ensuite ces 2 résultats en pourcentage de la population mondiale.
 ```{r}
 dispo2_veg_kcal<-jointure %>%
   filter(origin=="vegetal")%>%
@@ -266,20 +270,68 @@ b2<-dispo2_veg_prot%>%mutate(nb_pers_nourries_prot=as.numeric(dom_sup_kg_prot/36
 b2$nb_pers_nourries_prot<-formatC(b2$nb_pers_nourries_prot,format="e",digits=5)
 
 b2
-df
+
+```
+
+
+### 3. Table sous_nutrition 
+
+```{r}
+unique(unourished_people$Unit)
+#toutes les donn�es sont en millions
+```
+
+
+```{r}
+sous_nutrition_table<- unourished_people%>%
+       rename("country_code"=Area.Code,
+       "country"=Area,
+       "yeart"=Year)%>%
+      filter(country_code!=351)
+
+sous_nutrition_table<-sous_nutrition_table%>%
+                      mutate(nb_personnes=as.numeric(str_replace_all(Value,"<",""))*1000000)%>%
+                      mutate(year=ifelse(yeart=="2012-2014",
+                             "2013",
+                             ifelse(yeart=="2013-2015",
+                                    "2014",
+                                     ifelse(yeart=="2014-2016",
+                                            "2015",
+                                            ifelse(yeart=="2015-2017",
+                                                   "2016",
+                                                   ifelse(yeart=="2016-2018",
+                                                          "2017",NA))))))%>%
+        select(country_code,country,year,nb_personnes) %>%
+        arrange(desc(nb_personnes)) 
 ```
 
 
 
+```{r}
+colnames(sous_nutrition_table)
+```
 
 
+#### 3.1 Quelle proportion de la population mondiale est consid�r�e comme �tant en sous-nutrition
 
+```{r}
+sous_nutrition_year<-sous_nutrition_table%>%
+                     group_by(year)%>%
+                     summarise(nb_personnes_sous_nutrition=sum(nb_personnes,na.rm=TRUE))
+```
 
+```{r}
+pop_totale$year<-as.character(pop_totale$year)
+prop_sous_nutrition<-left_join(pop_totale,sous_nutrition_year,by=c("year"))
+prop_sous_nutrition<-prop_sous_nutrition%>%mutate(proportion_prct=round(100*nb_personnes_sous_nutrition/total,2))
+```
 
+#### 3.2 Liste des pays en sous nutrition
+```{r}
+sous_nutrition_table%>%filter(year=="2014")
+```
 
-
-
-
+#### 3.3 Liste des pays les plus export�s
 
 
 
