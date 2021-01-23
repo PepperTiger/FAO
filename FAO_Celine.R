@@ -2,14 +2,17 @@ library("stringr")
 library("tidyverse")
 
 # Read the folder of csv files
-fichiers<-list.files(path = "C:/Users/celine/environnement_R_studio/FAO/fichiers_csv", pattern = NULL, all.files = FALSE,
+#relative path
+rchemin <- "/fichiers_csv/"
+
+fichiers<-list.files(path = rchemin, pattern = NULL, all.files = FALSE,
                      full.names = FALSE, recursive = FALSE,
                      ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
 
 #put csv files in tables
 for (i in 1:length(fichiers)){
   assign(x=str_sub(fichiers[i],1,-5),
-         value=read.csv(paste0("C:/Users/celine/environnement_R_studio/FAO/fichiers_csv/",fichiers[i])))
+         value=read.csv(paste0(rchemin,fichiers[i])))
 }
 
 
