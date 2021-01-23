@@ -390,6 +390,59 @@ import_produit_2017<-import_produit_2017%>%
   
 ```
 
+#### 3.6 Donnez les 3 produits qui ont la plus grande valeur pour chacun des 2 ratios
+
+
+```{r}
+import_produit_2017%>%arrange(desc(ratio_other_uses_prct))%>%select(item,ratio_other_uses_prct)%>%head(3)
+import_produit_2017%>%arrange(desc(ratio_anim))%>%select(item,ratio_anim)%>%head(3)
+
+```
+
+#### 3.7 Combien de tonnes de céréales pourraient être libérées si les USA diminuaient leur production de produits animaux de 10% ?
+
+```{r}
+
+prod_t%>%filter(country_code==231,is_cereal==TRUE,year==2014)%>%
+        summarise(n=sum(feed_1000t,na.rm=TRUE)*0.9*1000)
+```
+
+#### 3.8 En Thaïlande, quelle proportion de manioc est exportée ? Quelle est la proportion de personnes en sous-nutrition ?
+
+```{r}
+#quantité de manioc exportée en milliers de tonnes en Thailande
+prod_t%>%
+filter(country_code==216,grepl("cassava",item,ignore.case=TRUE))%>%
+select(country,year,export_qu_1000t)
+
+```
+```{r}
+c<- population_table%>%filter(country_code==216)%>%select(year,population)
+sous_nutrition_table$year<-as.numeric(sous_nutrition_table$year)
+
+u<-sous_nutrition_table%>%filter(country_code==216)
+data_thailand<-inner_join(c,u,by=c("year"))
+data_thailand<-data_thailand%>%
+               mutate(prct=round(100*nb_personnes/population,2))
+print(data_thailand)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
