@@ -1,0 +1,284 @@
+---
+title: "FAO_Markdown"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###  Importation et préparation des données
+
+```{r cars}
+#read the folder of csv files
+library("stringr")
+library("tidyverse")
+fichiers<-list.files(path = "C:/Users/celine/environnement_R_studio/FAO/fichiers_csv", pattern = NULL, all.files = FALSE,
+                     full.names = FALSE, recursive = FALSE,
+                     ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
+
+#put csv files in tables
+for (i in 1:length(fichiers)){
+  assign(x=str_sub(fichiers[i],1,-5),
+         value=read.csv(paste0("C:/Users/celine/environnement_R_studio/FAO/fichiers_csv/",fichiers[i])))
+}
+
+
+```
+
+
+```{r}
+
+#concat tables bilan_prod_animaux and bilan_vegetaux adding "origin" variable
+
+bilan_prod_animaux$origin<-"animal"
+temp<-bilan_prod_animaux
+
+for (i in c('4','5','6','7')){
+  df<-get(paste0("bilan_vegetaux_201",i))
+  df$origin="vegetal"
+  temp<-bind_rows(temp,df)
+}
+
+temp<-temp%>%select(-c(1,2,5,9,13,14))
+
+```
+
+```{r}
+# Check units to transpose
+l<-unique(temp$Element)
+
+for (i in c(1:13)){
+  v<-temp%>%filter(Element==l[i],Unit!="1000 tonnes")
+  print(dim(v)[1])
+}
+```
+
+```{r}
+#transpose to have products dataset
+temp<-temp%>%select(-Unit)
+
+prod_t<-temp%>%pivot_wider(names_from = Element, values_from = Value)
+
+
+prod_t<-prod_t%>%rename("country_code"=Area.Code,
+                        "country"=Area,
+                        "item_code"=Item.Code,
+                        "item"=Item,
+                        "year"=Year,
+                        "production_1000t"=Production,
+                        "import_qu_1000t"=`Import Quantity`,
+                        "stock_var_1000t"=`Stock Variation`,
+                        "export_qu_1000t"=`Export Quantity`,
+                        "domestic_supply_qu_1000t"=`Domestic supply quantity`,
+                        "feed_1000t"=Feed,
+                        "seed_1000t"=Seed,
+                        "losses_1000t"=Losses,
+                        "processing"=Processing,
+                        "other_uses_1000t"=`Other uses (non-food)`,
+                        "tourist_consumption_1000t"=`Tourist consumption`,
+                        "residuals_1000t"=Residuals,
+                        "food_1000t"=Food,
+                        "food_sup_qu_kg/cpt/yr"=`Food supply quantity (kg/capita/yr)`,
+                        "food_sup_qu_kcal/cpt/day" = `Food supply (kcal/capita/day)`,
+                        "protein_sup_qu_g/cpt/day"=`Protein supply quantity (g/capita/day)`,
+                        "fat_sup_qu_g/cpt/day"=`Fat supply quantity (g/capita/day)`)
+
+```
+
+```{r}
+#drop duplicate country (China)
+prod_t<-prod_t%>%filter(country_code!=351)
+
+colnames(prod_t)
+```
+### Population table and analysis
+
+
+```{r}
+population_table<- population_data%>%
+  rename('country'=Area,'country_code'=Area.Code,'year'=Year)%>%
+  mutate(population=Value*1000)%>%
+  filter(country_code!=351)%>%
+  select(country,country_code,year,population)
+
+```
+```{r}
+colnames(population_table)
+```
+
+### 1.1 taille de la population mondiale depuis 2014
+```{r}
+
+population_table%>%group_by(year)%>%summarise(total=sum(population,na.rm=TRUE))
+```
+
+
+### 2. dispo_alim table and analysis
+```{r}
+dispo_alim_table<-prod_t%>% mutate(food_sup_t=food_1000t*1000) %>%
+  select(country,country_code,year,item,item_code, origin,`food_sup_qu_kcal/cpt/day`,
+         food_sup_t,`protein_sup_qu_g/cpt/day`,`fat_sup_qu_g/cpt/day`)
+```
+
+
+```{r}
+colnames(dispo_alim_table)
+
+```
+
+```{r}
+cereal<-dispo_alim_table%>%
+  select(item,item_code) %>%
+  filter(grepl("(cereals|wheat|rye|rice|barley|oats|corn|maize|millet|sorghum)",item,ignore.case = TRUE),
+         grepl("oil",item,ignore.case = TRUE)==FALSE)%>%distinct()
+
+prod_t<-prod_t%>%mutate(is_cereal=ifelse(item %in% cereal$item,TRUE,FALSE))
+```
+
+```{r}
+colnames(prod_t)
+
+```
+####2.1 liste des céréales selon la FAO
+```{r}
+cereal$item
+```
+#### 2.1.2 calcul de la proportion de nourriture céréalières destinée aux animaux depuis 2014
+```{r}
+
+prod_t%>%filter(item %in% cereal$item)%>%group_by(year)%>%
+  summarise(prop_prct=100*sum(feed_1000t,na.rm=TRUE)/(sum(food_1000t,na.rm=TRUE)+sum(feed_1000t,na.rm=TRUE)))
+
+```
+### 2.2 Comment mesure-t-on la dispo alimentaire?
+#### 2.2.1 dispo alim par pays et par produit
+
+```{r}
+jointure<-left_join(prod_t,population_table,by=c("country_code","country","year"))
+```
+
+#### 2.2.2  et 2.2.3 ratio énergie/poids et ratio énergie/proteine
+```{r}
+jointure<-jointure%>%
+  mutate(ratio_kcal_kg=ifelse(food_1000t!=0,round(`food_sup_qu_kcal/cpt/day`*365*population/(food_1000t*1000*1000),2),NA))
+```
+```{r}
+jointure<-jointure%>%mutate(ratio_protein_prct=ifelse(`food_sup_qu_kg/cpt/yr`!=0,
+                                                 100*`protein_sup_qu_g/cpt/day`*365/(1000*`food_sup_qu_kg/cpt/yr`),
+                                                 NA)) %>%
+                    filter(ratio_kcal_kg>20,ratio_kcal_kg<=9200)
+
+ratios<-jointure%>%select(country_code,country,item_code,item,origin,ratio_kcal_kg,ratio_protein_prct)
+```
+
+```{r}
+colnames(ratios)
+```
+### 2.3 Top 20 des aliments
+
+#### 2.3.1 Aliments les + caloriques : Citez 5 aliments parmi les 20 aliments les plus caloriques, en utilisant le ratio énergie/poids ?
+```{r}
+
+foodmoy<- ratios%>%
+  group_by(item)%>%
+  summarise(moykcal_kg=mean(ratio_kcal_kg,na.rm=TRUE),moyprot=mean(ratio_protein_prct,na.rm=TRUE))%>%
+  arrange(desc(moykcal_kg))%>%
+  head(20)
+
+foodmoy$moyprot<-formatC(foodmoy$moyprot,format="g", digits=5)
+
+print(foodmoy)
+
+```
+
+#### Citez 5 aliments parmi les 20 aliments les plus riches en protéines
+```{r}
+foodmoyprot<-ratios%>%
+  group_by(item)%>%
+  summarise(moykcal_kg=mean(ratio_kcal_kg,na.rm=TRUE),moyprot=mean(ratio_protein_prct,na.rm=TRUE))%>%
+  arrange(desc(moyprot))%>%
+  head(20)
+
+print(foodmoyprot)
+
+```
+### 2.4 Disponibilité mondiale
+#### 2.4.1 en végétaux uniquement : Calculer, pour les produits végétaux uniquement, la disponibilité intérieure mondiale exprimée en kcal et en Kg protéines pour chaque année et tracer la viz correspondante ?
+
+```{r}
+dispo_veg_kcal<-jointure%>%filter(origin=="vegetal")%>%
+                  mutate(dom_sup_kcal_country=domestic_supply_qu_1000t*1000000*ratio_kcal_kg)%>%
+                  group_by(year)%>%
+                  summarise(dom_sup_kcal=sum(dom_sup_kcal_country,na.rm=TRUE))
+```
+```{r}
+dispo_veg_prot<-jointure%>%filter(origin=="vegetal")%>%
+                 mutate(dom_sup_kg_prot_country=domestic_supply_qu_1000t*1000000*ratio_protein_prct*0.01)%>%
+                 group_by(year)%>%
+                 summarise(dom_sup_kg_prot=sum(dom_sup_kg_prot_country,na.rm=TRUE))
+```
+```{r}
+ggplot(dispo_veg_kcal)+geom_point(aes(x=year,y=dom_sup_kcal))
+
+ggplot(dispo_veg_prot)+ geom_point(aes(x=year,y=dom_sup_kg_prot))
+```
+
+
+#### 2.4.2 Combien d'humains pourraient être nourris si toute la disponibilité intérieure mondiale de produits végétaux était utilisée pour de la nourriture ? Donnez les résultats en termes de calories, puis de protéines, et exprimez ensuite ces 2 résultats en pourcentage de la population mondiale.
+
+```{r}
+a<-dispo_veg_kcal%>%mutate(nb_pers_nourries=(dom_sup_kcal/365)/2500)
+                           
+a$nb_pers_nourries<-formatC(a$nb_pers_nourries,format="e",digits=5)
+
+a
+
+
+b<-dispo_veg_prot%>%mutate(nb_pers_nourries_prot=as.numeric(dom_sup_kg_prot/365)/0.056)
+b$nb_pers_nourries_prot<-formatC(b$nb_pers_nourries_prot,format="e",digits=5)
+
+b
+```
+
+#### 2.4.3 Combien d'humains pourraient être nourris si toute la disponibilité alimentaire en produits végétaux (Food), la nourriture végétale destinée aux animaux (Feed) et les pertes de produits végétaux (Waste) étaient utilisés pour de la nourriture ? Donnez les résultats en termes de calories, puis de protéines, et exprimez ensuite ces 2 résultats en pourcentage de la population mondiale.
+```{r}
+dispo2_veg_kcal<-jointure %>%
+  filter(origin=="vegetal")%>%
+  mutate(dom_sup_kcal_country=(food_1000t+feed_1000t+losses_1000t)*1000000*ratio_kcal_kg)%>%
+  group_by(year)%>%
+  summarise(dom_sup_kcal=sum(dom_sup_kcal_country,na.rm=TRUE))
+
+
+dispo2_veg_prot<-jointure%>%filter(origin=="vegetal")%>%
+  mutate(dom_sup_kg_prot_country=(food_1000t+feed_1000t+losses_1000t)*1000000*ratio_protein_prct*0.01)%>%
+  group_by(year)%>%
+  summarise(dom_sup_kg_prot=sum(dom_sup_kg_prot_country,na.rm=TRUE))
+
+a2<-dispo2_veg_kcal%>%mutate(nb_pers_nourries=(dom_sup_kcal/365)/2500)
+
+a2$nb_pers_nourries<-formatC(a2$nb_pers_nourries,format="e",digits=5)
+
+a2
+
+
+b2<-dispo2_veg_prot%>%mutate(nb_pers_nourries_prot=as.numeric(dom_sup_kg_prot/365)/0.056)
+b2$nb_pers_nourries_prot<-formatC(b2$nb_pers_nourries_prot,format="e",digits=5)
+
+b2
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
