@@ -266,7 +266,7 @@ b2<-dispo2_veg_prot%>%mutate(nb_pers_nourries_prot=as.numeric(dom_sup_kg_prot/36
 b2$nb_pers_nourries_prot<-formatC(b2$nb_pers_nourries_prot,format="e",digits=5)
 
 b2
-
+hjk
 ```
 
 

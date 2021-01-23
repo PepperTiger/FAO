@@ -82,6 +82,7 @@ prod_t<-prod_t%>%filter(country_code!=351)
 population_t<- population_data%>%
   rename('country'=Area,'country_code'=Area.Code,'year'=Year)%>%
   mutate(population=Value*1000)%>%
+  filter(country_code!=351)%>%
   select(country,country_code,year,population)
 
 # population_t%>%filter(grepl("china",country,ignore.case=TRUE))%>%distinct(country,.keep_all = TRUE)
