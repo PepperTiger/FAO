@@ -328,10 +328,68 @@ prop_sous_nutrition<-prop_sous_nutrition%>%mutate(proportion_prct=round(100*nb_p
 
 #### 3.2 Liste des pays en sous nutrition
 ```{r}
-sous_nutrition_table%>%filter(year=="2014")
+sous_nutrition_table%>%filter(year=="2017")
 ```
 
-#### 3.3 Liste des pays les plus exportés
+#### 3.3 Liste des pays les plus exportés dans les pays en sous nutrition
+
+```{r}
+#pays en sous nutrition recencés par la FAO
+pays_ss_nutrition_2017<-sous_nutrition_table%>%
+                        filter(year=="2017",is.na(nb_personnes)==FALSE)%>%
+                        select(country)
+```
+
+
+
+```{r}
+#produits les + exportés par le groupe de pays pays_ss_nutrition
+export_produit_2017 <- prod_t%>%
+                  filter(country %in% pays_ss_nutrition$country,year==2017) %>%
+                  group_by(item)%>%
+                  summarise(export_qu_millierst=sum(export_qu_1000t,na.rm=TRUE))%>%
+                  arrange(desc(export_qu_millierst))%>%
+                  head(15)
+                  
+```
+
+#### 3. 4 Parmi les données des bilans alimentaires au niveau mondial, sélectionner les 200 plus grandes importations de ces produits (ie les 15 les plus exportés dans les pays en sous nutrition) (1 importation = une quantité d'un produit donné importée par un pays donné sur l'année choisie) 
+
+```{r}
+grandes_importations_2017<-prod_t%>%
+                     filter(item %in% export_produit_2017$item,year==2017)%>%
+                     # select(country_code,country,item_code,item,year,origin,import_qu_1000t)%>%
+                     arrange(desc(import_qu_1000t))%>%
+                     head(200)
+```
+
+#### 3.5 : Regrouper les importations par produit (ie la liste de produits précédents)
+
+
+```{r}
+import_produit_2017<-grandes_importations_2017%>%
+                select(-year,-country_code,-c(20:23),-item_code)  %>%
+                group_by(item)%>%
+                summarise_if(is.numeric,funs(sum))
+
+```
+
+```{r}
+# pour chacun des produits listés précedemment,
+# Le ratio entre la quantité destinés aux "Autres utilisations" (Other uses) et la disponibilité intérieure.
+#Le ratio entre la quantité destinée à la nourriture animale et la quantité destinée à la nourriture (animale + humaine)
+
+import_produit_2017<-import_produit_2017%>%
+                mutate(ratio_other_uses_prct=ifelse(domestic_supply_qu_1000t!=0,
+                                                 100*other_uses_1000t/domestic_supply_qu_1000t,
+                                                 NA),
+                       ratio_anim=100*feed_1000t/(food_1000t+feed_1000t))%>%
+                select(item,domestic_supply_qu_1000t,other_uses_1000t,ratio_other_uses_prct,
+                       food_1000t,feed_1000t,ratio_anim)%>%
+                filter(is.na(ratio_other_uses_prct)==FALSE | is.na(ratio_anim)==FALSE)
+  
+```
+
 
 
 
