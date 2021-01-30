@@ -5,20 +5,22 @@ options(scipen=999)
 # termes de protéines (en kg) par habitant, puis en termes de kcal par habitant.
 
 Q1_1_sql <- sqldf( 
-  "SELECT country,[protein_sup_qu_g/cpt/day] 
-  FROM [dispo_alim_table]
+  "SELECT country,round((sum([protein_sup_qu_g/cpt/day]/1000)),2) as dispo_prot_day_pers_kg
+  FROM [jointure_clean]
   WHERE year = 2017
-  ORDER BY [protein_sup_qu_g/cpt/day] DESC 
+  GROUP BY country
+  ORDER BY dispo_prot_day_pers_kg DESC 
   LIMIT 10;"
 )
 
 Q1_1_sql
 
 Q1_2_sql <-sqldf( 
-  "SELECT country,[food_sup_qu_kcal/cpt/day] 
-  FROM [dispo_alim_table]
+  "SELECT country,(sum([food_sup_qu_kcal/cpt/day])) as dispo_kcal_day_pers 
+  FROM [jointure_clean]
   WHERE year = 2017
-  ORDER BY [food_sup_qu_kcal/cpt/day] DESC 
+  GROUP BY country
+  ORDER BY dispo_kcal_day_pers DESC 
   LIMIT 10;"
 )
 
