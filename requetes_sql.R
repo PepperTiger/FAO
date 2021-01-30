@@ -1,4 +1,4 @@
-install.packages("sqldf","gsubfn","proto","RSQLite")
+install.packages("sqldf")
 library(sqldf)
 options(scipen=999)
 # 1. Les 10 pays ayant le plus haut ratio disponibilité alimentaire/habitant en
