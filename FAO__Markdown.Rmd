@@ -345,7 +345,7 @@ pays_ss_nutrition_2017<-sous_nutrition_table%>%
 ```{r}
 #produits les + exportés par le groupe de pays pays_ss_nutrition
 export_produit_2017 <- prod_t%>%
-                  filter(country %in% pays_ss_nutrition$country,year==2017) %>%
+                  filter(country %in% pays_ss_nutrition_2017$country,year==2017) %>%
                   group_by(item)%>%
                   summarise(export_qu_millierst=sum(export_qu_1000t,na.rm=TRUE))%>%
                   arrange(desc(export_qu_millierst))%>%
