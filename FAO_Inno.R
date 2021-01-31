@@ -213,4 +213,4 @@ b
 # population = dom_sup.loc[YEAR, "dom_sup_kcal"] / 365 / NB_KCAL_PER_CAPITA_PER_DAY
 # 
 # 
-#   
+# 
