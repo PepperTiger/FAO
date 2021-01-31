@@ -24,7 +24,7 @@ fichiers<-list.files(path = "./fichiers_csv", pattern = NULL, all.files = FALSE,
 #put csv files in tables
 for (i in 1:length(fichiers)){
   assign(x=str_sub(fichiers[i],1,-5),
-         value=read.csv(paste0("C:/Users/celine/environnement_R_studio/FAO/fichiers_csv/",fichiers[i])))
+         value=read.csv(paste0("./fichiers_csv/",fichiers[i])))
 }
 
 
@@ -279,7 +279,7 @@ b2
 
 ```{r}
 unique(unourished_people$Unit)
-#toutes les données sont en millions
+#toutes les donnÃ©es sont en millions
 ```
 
 
@@ -313,7 +313,7 @@ colnames(sous_nutrition_table)
 ```
 
 
-#### 3.1 Quelle proportion de la population mondiale est considérée comme étant en sous-nutrition
+#### 3.1 Quelle proportion de la population mondiale est considÃ©rÃ©e comme Ã©tant en sous-nutrition
 
 ```{r}
 sous_nutrition_year<-sous_nutrition_table%>%
@@ -332,10 +332,10 @@ prop_sous_nutrition<-prop_sous_nutrition%>%mutate(proportion_prct=round(100*nb_p
 sous_nutrition_table%>%filter(year=="2017")
 ```
 
-#### 3.3 Liste des pays les plus exportés dans les pays en sous nutrition
+#### 3.3 Liste des pays les plus exportÃ©s dans les pays en sous nutrition
 
 ```{r}
-#pays en sous nutrition recencés par la FAO
+#pays en sous nutrition recencÃ©s par la FAO
 pays_ss_nutrition_2017<-sous_nutrition_table%>%
                         filter(year=="2017",is.na(nb_personnes)==FALSE)%>%
                         select(country)
@@ -344,7 +344,7 @@ pays_ss_nutrition_2017<-sous_nutrition_table%>%
 
 
 ```{r}
-#produits les + exportés par le groupe de pays pays_ss_nutrition
+#produits les + exportÃ©s par le groupe de pays pays_ss_nutrition
 export_produit_2017 <- prod_t%>%
                   filter(country %in% pays_ss_nutrition_2017$country,year==2017) %>%
                   group_by(item)%>%
@@ -354,7 +354,7 @@ export_produit_2017 <- prod_t%>%
                   
 ```
 
-#### 3. 4 Parmi les données des bilans alimentaires au niveau mondial, sélectionner les 200 plus grandes importations de ces produits (ie les 15 les plus exportés dans les pays en sous nutrition) (1 importation = une quantité d'un produit donné importée par un pays donné sur l'année choisie) 
+#### 3. 4 Parmi les donnÃ©es des bilans alimentaires au niveau mondial, sÃ©lectionner les 200 plus grandes importations de ces produits (ie les 15 les plus exportÃ©s dans les pays en sous nutrition) (1 importation = une quantitÃ© d'un produit donnÃ© importÃ©e par un pays donnÃ© sur l'annÃ©e choisie) 
 
 ```{r}
 grandes_importations_2017<-prod_t%>%
@@ -364,7 +364,7 @@ grandes_importations_2017<-prod_t%>%
                      head(200)
 ```
 
-#### 3.5 : Regrouper les importations par produit (ie la liste de produits précédents)
+#### 3.5 : Regrouper les importations par produit (ie la liste de produits prÃ©cÃ©dents)
 
 
 ```{r}
@@ -376,9 +376,9 @@ import_produit_2017<-grandes_importations_2017%>%
 ```
 
 ```{r}
-# pour chacun des produits listés précedemment,
-# Le ratio entre la quantité destinés aux "Autres utilisations" (Other uses) et la disponibilité intérieure.
-#Le ratio entre la quantité destinée à la nourriture animale et la quantité destinée à la nourriture (animale + humaine)
+# pour chacun des produits listÃ©s prÃ©cedemment,
+# Le ratio entre la quantitÃ© destinÃ©s aux "Autres utilisations" (Other uses) et la disponibilit? intÃ©rieure.
+#Le ratio entre la quantitÃ© destinÃ©e ? la nourriture animale et la quantitÃ© destinÃ©e ? la nourriture (animale + humaine)
 
 import_produit_2017<-import_produit_2017%>%
                 mutate(ratio_other_uses_prct=ifelse(domestic_supply_qu_1000t!=0,
@@ -400,7 +400,7 @@ import_produit_2017%>%arrange(desc(ratio_anim))%>%select(item,ratio_anim)%>%head
 
 ```
 
-#### 3.7 Combien de tonnes de céréales pourraient être libérées si les USA diminuaient leur production de produits animaux de 10% ?
+#### 3.7 Combien de tonnes de cÃ©rÃ©ales pourraient Ãªtre libÃ©rÃ©es si les USA diminuaient leur production de produits animaux de 10% ?
 
 ```{r}
 
@@ -408,10 +408,10 @@ prod_t%>%filter(country_code==231,is_cereal==TRUE,year==2014)%>%
         summarise(n=sum(feed_1000t,na.rm=TRUE)*0.9*1000)
 ```
 
-#### 3.8 En Thaïlande, quelle proportion de manioc est exportée ? Quelle est la proportion de personnes en sous-nutrition ?
+#### 3.8 En TaÃ¯lande, quelle proportion de manioc est exportÃ©e ? Quelle est la proportion de personnes en sous-nutrition ?
 
 ```{r}
-#quantité de manioc exportée en milliers de tonnes en Thailande
+#quantitÃ© de manioc exportÃ©e en milliers de tonnes en ThaÃ¯lande
 prod_t%>%
 filter(country_code==216,grepl("cassava",item,ignore.case=TRUE))%>%
 select(country,year,export_qu_1000t)
@@ -449,7 +449,7 @@ equilibre_prod_table<-prod_t%>%select(country,
 ```{r}
 colnames(equilibre_prod_table)
 ```
-####4.1 relations mathématiques entre les vartables : vérif avec le blé en France 
+####4.1 relations mathÃ©matiques entre les vartables : vÃ©rif avec le blÃ© en France 
 ```{r}
 fr<-prod_t%>%filter(item_code==2511,country=='France',year==2017)
 
@@ -464,7 +464,7 @@ fr$seed_1000t+fr$losses_1000t+fr$food_1000t+fr$feed_1000t+fr$processing_1000t+fr
 
 
 
-####Prévisions sur le nombre d'habitants
+####PrÃ©visions sur le nombre d'habitants
 
 ```{r}
 ggplot(pop_totale, aes(x=as.numeric(year), y=total)) +
@@ -474,7 +474,7 @@ ggplot(pop_totale, aes(x=as.numeric(year), y=total)) +
 ```
 
 
-####Prévisions sur le nombre de personnes en sous nutrition
+####PrÃ©visions sur le nombre de personnes en sous nutrition
 
 
 ```{r}
