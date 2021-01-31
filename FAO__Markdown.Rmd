@@ -1,6 +1,7 @@
 ---
 title: "FAO_Markdown"
-output: html_document
+output:
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -10,13 +11,13 @@ knitr::opts_chunk$set(echo = TRUE)
 ###  Importation et prÃ©paration des donnÃ©es
 
 ```{r cars}
-#chargement des livrairies
+#load libraries
 library("stringr")
 library("tidyverse")
 
 #read the folder of csv files
 
-fichiers<-list.files(path = "C:/Users/celine/environnement_R_studio/FAO/fichiers_csv", pattern = NULL, all.files = FALSE,
+fichiers<-list.files(path = "./fichiers_csv", pattern = NULL, all.files = FALSE,
                      full.names = FALSE, recursive = FALSE,
                      ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
 
@@ -175,7 +176,7 @@ jointure<-jointure%>%mutate(ratio_protein_prct=ifelse(`food_sup_qu_kg/cpt/yr`!=0
 
 ratios<-jointure%>%select(country_code,country,item_code,item,origin,ratio_kcal_kg,ratio_protein_prct)
 ```
-
+ 
 ```{r}
 colnames(ratios)
 ```
@@ -449,13 +450,40 @@ equilibre_prod_table<-prod_t%>%select(country,
 colnames(equilibre_prod_table)
 ```
 ####4.1 relations mathématiques entre les vartables : vérif avec le blé en France 
+```{r}
+fr<-prod_t%>%filter(item_code==2511,country=='France',year==2017)
+
+fr$production_1000t+fr$import_qu_1000t-fr$export_qu_1000t-fr$stock_var_1000t
+
+fr$domestic_supply_qu_1000t
+fr$seed_1000t+fr$losses_1000t+fr$food_1000t+fr$feed_1000t+fr$processing_1000t+fr$other_uses_1000t
+```
 
 
 
 
 
 
+####Prévisions sur le nombre d'habitants
 
+```{r}
+ggplot(pop_totale, aes(x=as.numeric(year), y=total)) +
+  geom_point() +
+  geom_smooth(method=lm, fullrange=TRUE) +
+  xlim(NA, 2050)
+```
+
+
+####Prévisions sur le nombre de personnes en sous nutrition
+
+
+```{r}
+ggplot(sous_nutrition_year, aes(x=as.numeric(year), y=nb_personnes_sous_nutrition)) +
+  geom_point() +
+  geom_smooth(method=lm, fullrange=TRUE) +
+  xlim(NA, 2050)
+
+```
 
 
 

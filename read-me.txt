@@ -1,0 +1,11 @@
+
+-fichier_csv contient les datasets du site de la FAO
+
+-lancer le fichier FAO_Markdown : adapter si nécessaire le chemin pour importer les fichiers csv
+
+-Le fichier R_shiny_pop contient une application R shiny sur les données de la FAO
+
+-le fichier requetes_sql contient les requêtes du fichier.  
+
+Packages utilisés : tidyverse, sqldf, shiny, shiny, shinythemes. 
+
