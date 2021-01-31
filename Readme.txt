@@ -1,12 +1,12 @@
 ** Descriptif **
 
-Ceci est un projet de groupe dans le cadre d'études en Mastère 1 de Data Science.
-Il concerne l'étude de données réelles de l'Organisation des Nations unies pour l'alimentation et l'agriculture (FAO).
+Ceci est un projet de groupe dans le cadre d'Ã©tudes en MastÃ¨re 1 de Data Science.
+Il concerne l'Ã©tude de donnÃ©es rÃ©elles de l'Organisation des Nations unies pour l'alimentation et l'agriculture (FAO).
 
-Le groupe de travail est constitué de:
+Le groupe de travail est constituÃ© de:
 
-- Céline Mendola
-- Amélie Xu
+- CÃ©line Mendola
+- AmÃ©lie Xu
 - Letizia Pichon
 - Juddy Soukkari
 - InnoKentyi Vetrov
@@ -16,24 +16,24 @@ Le groupe de travail est constitué de:
 
 
 
-** Prérequis **
+** PrÃ©requis **
 
-Packages utilisés : tidyverse, sqldf, shiny, shiny, shinythemes
-Ces packages sont à installer pour que les scripts évoqués ci-après fonctionnent.
+Packages utilisÃ©s : tidyverse, sqldf, shiny, shinythemes
+Ces packages sont Ã  installer pour que les scripts Ã©voquÃ©s ci-aprÃ¨s fonctionnent.
 
 
 
 ** Utilisation **
 
 Le dossier "fichier_csv"" contient les datasets du site de la FAO
-Pour accéder à l'étude:
+Pour accÃ©der Ã  l'Ã©tude:
 
-- lancer le fichier "FAO_Markdown.Rmd"" pour extraire et traiter les données
+- lancer le fichier "FAO_Markdown.Rmd"" pour extraire et traiter les donnÃ©es
 
 Puis:
 
-- lancer le fichier "Application_Rshiny.R" pour visualiser les données de la FAO grâce à Rshiny
+- lancer le fichier "Application_Rshiny.R" pour visualiser les donnÃ©es de la FAO grÃ¢ce Ã  Rshiny
 
-Le fichier "Requetes_sql.R" est une autre manière d'exploiter les données.
-Il est présent à titre d'exercice théorique et n'est pas exploité dans la visualisation Rshiny
+Le fichier "Requetes_sql.R" est une autre maniÃ¨re d'exploiter les donnÃ©es.
+Il est prÃ©sent Ã  titre d'exercice thÃ©orique et n'est pas exploitÃ© dans la visualisation Rshiny
 
