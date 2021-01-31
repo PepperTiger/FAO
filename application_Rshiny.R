@@ -1,7 +1,6 @@
+options(scipen=99)
 
-
-
-# Table totale du nombre d'hab par années
+# Table totale du nombre d'hab par annÃ©es
 table_pop <- population_table%>%group_by(year)%>%summarise(total=sum(population,na.rm=TRUE))
 
 pop2 <- population_table %>% arrange(desc(population))
@@ -40,7 +39,7 @@ grandes_importations<-prod_t%>%
   # select(country_code,country,item_code,item,year,origin,import_qu_1000t)%>%
   arrange(desc(import_qu_1000t))
 
-#Gâchis 
+#GÃ¢chis 
 waste_country <- prod_t %>% group_by(country) %>% summarise(waste = sum(losses_1000t, na.rm = TRUE)) %>% arrange(waste) 
 waste_item <- prod_t %>% group_by(item) %>% summarise(waste = sum(losses_1000t, na.rm = TRUE)) %>% arrange(waste) 
 population_2014 <- population_table %>% filter(year == 2014)
@@ -66,13 +65,13 @@ ui <- fluidPage(navbarPage("Dashboard"
                                              src=paste0("https://afr100.org/"
                                                         ,"sites/default/files/"
                                                         ,"FAO_logo_Blue_3lines_en.jpg"))
-                                       ,mainPanel("Population mondiale selon l'année", tableOutput("table"))
+                                       ,mainPanel("Population mondiale selon l'annÃ©e", tableOutput("table"))
                                        ,mainPanel("Top 5  des pays ayant le plus grand nombre d'habitants en moyenne depuis 2014", tableOutput("liste1"))
-                                       , sliderInput("year", "Top 5 des pays avec le plus grand nombre d'habitants selon l'année",
+                                       , sliderInput("year", "Top 5 des pays avec le plus grand nombre d'habitants selon l'annÃ©e",
                                                      min = 2014, max = 2017, value = 1), tableOutput("year")  
-                                       , sliderInput("year2", "Top 5 des pays avec le moins grand nombre d'e population 'habitants selon l'année",
+                                       , sliderInput("year2", "Top 5 des pays avec le moins grand nombre d'e population 'habitants selon l'annÃ©e",
                                                      min = 2014, max = 2017, value = 1), tableOutput("year2")
-                                       , selectInput(inputId = "pays", label = strong("Liste des pays présents dans la base"),
+                                       , selectInput(inputId = "pays", label = strong("Liste des pays prÃ©sents dans la base"),
                                                      choices = unique(sort(top_hab$country)),
                                                      selected = "France")
                                        , "Nombre d'habitant par pays" , tableOutput("data")
@@ -85,10 +84,10 @@ ui <- fluidPage(navbarPage("Dashboard"
                                                     checkboxGroupInput("type", "Type d'alimentation:", c("vegetal", "animal"),selected = "vegetal")  )
                                      
                                      , mainPanel(
-                                       h1("Evolution de la production au fil des années"),
+                                       h1("Evolution de la production au fil des annÃ©es"),
                                        plotOutput("graph1")
                                        
-                                       ,  h3("Quantité de céréales en milliers de tonnes utilisées pour l'alimentation humaine et animale"),
+                                       ,  h3("QuantitÃ© de cÃ©rÃ©ales en milliers de tonnes utilisÃ©es pour l'alimentation humaine et animale"),
                                        plotOutput("graph2")) # mainPanel
                                                                 ) 
                            
@@ -96,7 +95,7 @@ ui <- fluidPage(navbarPage("Dashboard"
                            ,tabPanel("Pays en sous-nutrition"
                                      ,"Top 10 des pays en sous-nutrition"
                                      ,tableOutput("sous_nutri")
-                                     , selectInput(inputId = "pays2", label = strong("Liste des pays en sous nutrition répertorié dans la FAO"),
+                                     , selectInput(inputId = "pays2", label = strong("Liste des pays en sous nutrition rÃ©pertoriÃ© dans la FAO"),
                                                    choices = unique(sort(sous_nutrition_table$country)),
                                                    selected = "India"),tableOutput("data2")
                                      
@@ -106,43 +105,43 @@ ui <- fluidPage(navbarPage("Dashboard"
                            ,tabPanel("Importation"
                                      ,titlePanel('Pays importateurs des pays en sous-nutrition')
                                      ,tagList(
-                                       selectInput(inputId = "produit", label = strong("Liste des produits les plus exportés par les pays en sous-nutritions"),
+                                       selectInput(inputId = "produit", label = strong("Liste des produits les plus exportÃ©s par les pays en sous-nutritions"),
                                                    choices = unique(sort(export_produit$item))
                                                    ,selected = "Soyabeans")
-                                       ,selectInput(inputId = "an", label = strong("Choisir l'année"),
+                                       ,selectInput(inputId = "an", label = strong("Choisir l'annÃ©e"),
                                                     choices = c("2014","2015","2016","2016","2017")
                                                     ,selected = "2014")), plotOutput("imp")
                            )
                            
-                           #gâchis alimentaire
-                           ,tabPanel("Gâchis alimentaire" 
-                                     , sliderInput("tail1", "Top des pays qui font le plus de gâchis",
+                           #gÃ¢chis alimentaire
+                           ,tabPanel("GÃ¢chis alimentaire" 
+                                     , sliderInput("tail1", "Top des pays qui font le plus de gÃ¢chis",
                                                    min = 1, max = 10, value = 5), plotOutput("tail1")
-                                     , sliderInput("tail2", "Top des produits les plus jetés",
+                                     , sliderInput("tail2", "Top des produits les plus jetÃ©s",
                                                    min = 1, max = 10, value = 5), plotOutput("tail2")
-                                     , sliderInput("tail3", "Top des pays qui font le plus de gâchis par habitant en 2014",
+                                     , sliderInput("tail3", "Top des pays qui font le plus de gÃ¢chis par habitant en 2014",
                                                    min = 1, max = 10, value = 5), plotOutput("tail3")
-                                     , selectInput(inputId = "an", label = strong("Distribution de la production par pays et par année"),
+                                     , selectInput(inputId = "an", label = strong("Distribution de la production par pays et par annÃ©e"),
                                                    choices = c('2014',"2015","2016","2017")), plotOutput('an')
                                      ,tagList( selectInput(inputId = "pays3", label = strong("Liste des pays"),
                                                            choices = unique(sort(top_hab$country)),
                                                            selected = "France")
                                                
-                                               , selectInput(inputId = "an3", label = strong("Distribution de la production par pays et par année"),
+                                               , selectInput(inputId = "an3", label = strong("Distribution de la production par pays et par annÃ©e"),
                                                              choices = c('2014',"2015","2016","2017"))), plotOutput("pie")
                            )
                            
                            
-                           ,tabPanel("Prévision"
-                            , "Prévision population mondial"
+                           ,tabPanel("PrÃ©vision"
+                            , "PrÃ©vision population mondial"
                             , plotOutput("pre")
-                            , "Prévision population en sous-nutrition"
+                            , "PrÃ©vision population en sous-nutrition"
                             , plotOutput("pre2"))
 ))
 
 
 server <- function(input, output){
-  # Chiffres Clés
+  # Chiffres ClÃ©s
   output$table <- renderTable({table_pop})
   output$pays <- renderTable({population_t %>% filter(country == input$pays)})
   output$liste1 <- renderTable({top_hab %>% head() })
@@ -172,7 +171,7 @@ server <- function(input, output){
   
   
   
-  #Gâchis alimentaire
+  #GÃ¢chis alimentaire
   output$tail1 <- renderPlot({ ggplot(tail(waste_country,input$tail1), aes(x = reorder(country, waste), waste, fill = waste)) +
       geom_col() +
       coord_flip() +
@@ -181,7 +180,7 @@ server <- function(input, output){
   output$tail2 <- renderPlot({ggplot(tail(waste_item,input$tail2), aes(x = reorder(item, waste), waste, fill = waste)) +
       geom_col() +
       coord_flip() +
-      labs(titles = "Produits les plus jetés", x = "Produits", y = "Gachis en milliers de tonnes", fill = "Gachis")})
+      labs(titles = "Produits les plus jetÃ©s", x = "Produits", y = "Gachis en milliers de tonnes", fill = "Gachis")})
   
   output$tail3 <- renderPlot({ggplot(tail(ratio_habitant,input$tail3), aes(x = reorder(country, ratio), ratio, fill = ratio)) +
       geom_col() +
@@ -202,10 +201,10 @@ server <- function(input, output){
                                      arrange(production) %>% tail(10)
                                    , aes(x = reorder(country, production), production, fill = item)) +
       geom_col() +coord_polar("y", start=0) +
-      labs(titles = "Répartition des items produits", x = "Pays", y = "Production en milliers de tonnes", fill = "Origine")
+      labs(titles = "RÃ©partition des items produits", x = "Pays", y = "Production en milliers de tonnes", fill = "Origine")
   })
   
-  #Prévision
+  #PrÃ©vision
   output$pre <- renderPlot({ ggplot(pop_totale, aes(x=as.numeric(year), y=total)) +
     geom_point() +
     geom_smooth(mapping = NULL, data = NULL,method=lm, fullrange=TRUE) +
