@@ -9,7 +9,7 @@ Le groupe de travail est constitué de:
 - Amélie Xu
 - Letizia Pichon
 - Juddy Soukkari
-- InnoKentyi Vetrov
+- Innokentiy Vetrov
 - Paul Beuran
 - Jean-simon Lhost
 - Sven Lothe
