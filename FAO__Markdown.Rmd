@@ -24,7 +24,7 @@ fichiers<-list.files(path = "./fichiers_csv", pattern = NULL, all.files = FALSE,
 #put csv files in tables
 for (i in 1:length(fichiers)){
   assign(x=str_sub(fichiers[i],1,-5),
-         value=read.csv(paste0("C:/Users/celine/environnement_R_studio/FAO/fichiers_csv/",fichiers[i])))
+         value=read.csv(paste0("./fichiers_csv/",fichiers[i])))
 }
 
 
@@ -107,6 +107,7 @@ population_table<- population_data%>%
   select(country,country_code,year,population)
 
 ```
+
 ```{r}
 colnames(population_table)
 ```
@@ -168,6 +169,7 @@ jointure<-left_join(prod_t,population_table,by=c("country_code","country","year"
 jointure<-jointure%>%
   mutate(ratio_kcal_kg=ifelse(food_1000t!=0,round(`food_sup_qu_kcal/cpt/day`*365*population/(food_1000t*1000*1000),2),NA))
 ```
+
 ```{r}
 jointure<-jointure%>%mutate(ratio_protein_prct=ifelse(`food_sup_qu_kg/cpt/yr`!=0,
                                                  100*`protein_sup_qu_g/cpt/day`*365/(1000*`food_sup_qu_kg/cpt/yr`),
@@ -217,12 +219,14 @@ dispo_veg_kcal<-jointure%>%filter(origin=="vegetal")%>%
                   group_by(year)%>%
                   summarise(dom_sup_kcal=sum(dom_sup_kcal_country,na.rm=TRUE))
 ```
+
 ```{r}
 dispo_veg_prot<-jointure%>%filter(origin=="vegetal")%>%
                  mutate(dom_sup_kg_prot_country=domestic_supply_qu_1000t*1000000*ratio_protein_prct*0.01)%>%
                  group_by(year)%>%
                  summarise(dom_sup_kg_prot=sum(dom_sup_kg_prot_country,na.rm=TRUE))
 ```
+
 ```{r}
 ggplot(dispo_veg_kcal)+geom_point(aes(x=year,y=dom_sup_kcal))
 
@@ -461,7 +465,19 @@ fr$seed_1000t+fr$losses_1000t+fr$food_1000t+fr$feed_1000t+fr$processing_1000t+fr
 
 
 
+### Relation entre le nombre d'habitant sur Terre et le nombre de personnes en sous-nutrition
 
+```{r}
+ggplot(pop_totale, aes(x=as.numeric(year), y=total)) +
+  geom_point() +
+  geom_smooth(method=lm, fullrange=TRUE) +
+  xlim(NA, 2050)
+
+ggplot(sous_nutrition_year, aes(x=as.numeric(year), y=nb_personnes_sous_nutrition)) +
+  geom_point() +
+  geom_smooth(method=lm, fullrange=TRUE) +
+  xlim(NA, 2050)
+```
 
 
 ####Prévisions sur le nombre d'habitants
