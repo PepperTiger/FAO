@@ -65,8 +65,8 @@ ui <- fluidPage(navbarPage("Dashboard"
                                          src=paste0("https://afr100.org/"
                                          ,"sites/default/files/"
                                          ,"FAO_logo_Blue_3lines_en.jpg")))
-                                ,h2("FAO est l'Organisation des Nations unies pour l'alimentation et 
-                                    l'agriculture est une organisation spécialisée du système des Nations unies, créée en 1945 à Québec. Son siège est à Rome, au Palazzo FAO, depuis 1951."
+                                ,h2("FAO est l'Organisation des Nations unies pour l'alimentation et l'agriculture.")
+                                ,h2("C'est une organisation spécialisée du système des Nations unies, créée en 1945 à Québec. Son siège est à Rome, au Palazzo FAO, depuis 1951."
                                     )
                                 ,h3("Dans l'application Rshiny nous allons vous présenter:")
                                 ,h4(" - population mondiale")
@@ -91,7 +91,7 @@ ui <- fluidPage(navbarPage("Dashboard"
                                        , sliderInput("year", "Top 5 des pays avec le plus grand nombre d'habitants selon l'année",
                                                      min = 2014, max = 2017, value = 1)
                                                   , tableOutput("year")  
-                                       , sliderInput("year2", "Top 5 des pays avec le moins grand nombre d'e population 'habitants selon l'année",
+                                       , sliderInput("year2", "Top 5 des pays avec le moins grand nombre d'habitants selon l'année",
                                                      min = 2014, max = 2017, value = 1)
                                                     , tableOutput("year2")
                                        , selectInput(inputId = "pays", label = strong("Liste des pays présents dans la base"),
@@ -103,11 +103,7 @@ ui <- fluidPage(navbarPage("Dashboard"
                            
                             #production actuelle
                            ,tabPanel("Production actuelle"
-                                     , img(class="img-polaroid", height="50%", width="70%"
-                                         ,  src=paste0("http://i.huffpost.com/"
-                                                       ,"gen/1247156/thumbs/"
-                                                       ,"o-BARLEY-AND-BUCKWHEAT-facebook.jpg"
-                                         ))
+                                    
                                      
                                      , sidebarPanel(tags$h3("Input:"),
                                                     checkboxGroupInput("type", "Type d'alimentation:", c("vegetal", "animal"),selected = "vegetal"))
@@ -115,6 +111,11 @@ ui <- fluidPage(navbarPage("Dashboard"
                                      , mainPanel(
                                        h1("Evolution de la production au fil des années"),
                                        plotOutput("graph1")
+                                       , img(class="img-polaroid", height="50%", width="70%"
+                                             ,  src=paste0("http://i.huffpost.com/"
+                                                           ,"gen/1247156/thumbs/"
+                                                           ,"o-BARLEY-AND-BUCKWHEAT-facebook.jpg"
+                                             ))
                                        
                                        ,  h3("Quantité de céréales en milliers de tonnes utilisées pour l'alimentation humaine et animale"),
                                        plotOutput("graph2")) # mainPanel
@@ -174,8 +175,8 @@ ui <- fluidPage(navbarPage("Dashboard"
                                                    min = 1, max = 10, value = 5), plotOutput("tail2")
                                      , sliderInput("tail3", "Top des pays qui font le plus de gâchis par habitant en 2014",
                                                    min = 1, max = 10, value = 5), plotOutput("tail3")
-                                     , selectInput(inputId = "an", label = strong("Distribution de la production par pays et par année"),
-                                                   choices = c('2014',"2015","2016","2017")), plotOutput('an')
+                                     , selectInput(inputId = "an4", label = strong("Distribution de la production par pays et par année"),
+                                                   choices = c("2014","2015","2016","2017")), plotOutput("an4")
                                      ,tagList( selectInput(inputId = "pays3", label = strong("Liste des pays"),
                                                            choices = unique(sort(top_hab$country)),
                                                            selected = "France")
@@ -204,7 +205,7 @@ server <- function(input, output){
   # Chiffres Clés
   output$table <- renderTable({table_pop})
   output$pays <- renderTable({population_t %>% filter(country == input$pays)})
-  output$liste1 <- renderTable({top_hab %>% head() })
+  output$liste1 <- renderTable({top_hab %>% head(5) })
   output$year <- renderTable({pop2%>% filter(year== input$year) %>% head(5)})
   output$year2 <- renderTable({pop2%>% filter(year== input$year2) %>% tail(5)})
   output$data <- renderTable({pop2%>% filter(country== input$pays)})
@@ -256,8 +257,8 @@ server <- function(input, output){
       coord_flip() +
       labs(titles = "Gachis par Habitant en 2014", x = "Pays", y = "Perte moyenne en tonnes/habitant", fill = "Gachis")})
   
-  output$an <- renderPlot({ggplot(prod_t %>% 
-                                    filter(year ==  input$an ) %>% group_by(country, origin) %>%
+  output$an4 <- renderPlot({ggplot(prod_t %>% 
+                                    filter(year ==  input$an4 ) %>% group_by(country, origin) %>%
                                     summarize(production = sum(production_1000t, na.rm = TRUE)) %>% 
                                     filter((origin == 'animal' & production >= 50000) | (origin == 'vegetal' & production >= 400000)), aes(x = reorder(country, production), production, fill = origin)) +
       geom_col() +
